@@ -15,6 +15,16 @@
 # limitations under the License.
 #
 import webapp2
+import re
+import cgi
+
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def valid_username(username):
+    return USER_RE.match(username)
+welcome_page = """
+<h2>Welcome %(username)s</h2>
+"""
+
 form = """
 <form method="post">
   <table>
@@ -24,22 +34,42 @@ form = """
           <label for=username>Username</label>
         </td>
         <td>
-          <input name="username" type=text>
+          <input name="username" type=text value="%(username)s">
           <span style="color: red">%(usernameErr)s</span>
         </td>
       </tr>
     </tbody>
   </table>
-
+  <input type="submit">
 </form>
 """
 class MainHandler(webapp2.RequestHandler):
-    def writeForm(self, usernameErr = ""):
-        self.response.write(form % {"usernameErr" : usernameErr})
+    def writeForm(self, username = "", usernameErr = ""):
+        username = cgi.escape(username)
+        self.response.write(form % {"username" : username,
+                                    "usernameErr" : usernameErr})
 
     def get(self):
-        self.writeForm("Bad Username")
+        self.writeForm("", "")
+
+    def post(self):
+        username = self.request.get('username')
+
+        if valid_username(username):
+            self.redirect("/welcome_user?username=" + username)
+        else:
+            self.writeForm(username, "Bad Username")
+
+class WelcomeHandler(webapp2.RequestHandler):
+    def writeForm(self, username = ""):
+        self.response.write(welcome_page % {"username" : username})
+
+    def get(self):
+        username = self.request.get("username")
+        self.writeForm(username)
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/welcome_user', WelcomeHandler)
 ], debug=True)
