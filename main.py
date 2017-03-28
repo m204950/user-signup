@@ -106,10 +106,10 @@ class MainHandler(webapp2.RequestHandler):
         emailErr = ""
 
         if not valid_username(username):
-            usernameErr = "Bad Username"
+            usernameErr = "Bad Username.  Should be 3-20 Alpha-Numeric characters and '_', or '-'.  No spaces"
             form_ok = False
         if not valid_password(password):
-            passwordErr = "Bad Password"
+            passwordErr = "Bad Password.  Should be 3-20 characters.  Any characters may be used"
             form_ok = False
         else:
             if password != verify:
@@ -117,7 +117,7 @@ class MainHandler(webapp2.RequestHandler):
                 form_ok = False
         if email:    # anything entered for email
             if not valid_email(email):
-                emailErr = "Bad email entered"
+                emailErr = "Bad email entered.  Needs to be something like user@company.domain"
                 form_ok = False
 
         if form_ok:
